@@ -1,4 +1,4 @@
-# == Define: rsyslog::add_template
+# == Define: rsyslog::template
 #
 # This define allows you to add template strings to the rsyslog configuration
 # file.  These rules should be uniquely named.
@@ -24,10 +24,11 @@
 #
 # * Trevor Vaughan <mailto:tvaughan@onyxpoint.com>
 #
-define rsyslog::add_template (
-  $content
+define rsyslog::template (
+  $content,
 ) {
-  concat_fragment { "rsyslog+$name.template":
+
+  concat_fragment { "rsyslog_templates+$name.template":
     content => "\$template $name,\"$content\"\n"
   }
 }

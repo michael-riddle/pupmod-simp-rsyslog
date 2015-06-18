@@ -1,4 +1,4 @@
-#== Define: rsyslog::add_conf
+# == Define: rsyslog::rule::remote
 #
 # This adds a configuration file to the /etc/rsyslog.d directory.  Take care,
 # as these are processed prior to any other rules running.
@@ -42,11 +42,14 @@
 #
 # * Trevor Vaughan <mailto:tvaughan@onyxpoint.com>
 #
-define rsyslog::add_conf (
-  $content,
-  $dest = [],
+define rsyslog::rule::remote (
+  $rule,
+  $dest = hiera('log_servers'),
   $dest_type = 'tcp'
 ) {
+  validate_array($dest)
+  validate_net_list($dest)
+  validate_array_member($dest_type,['tcp','udp','relp'])
 
   $prefix = {
     'tcp'  => '@@',
@@ -54,17 +57,15 @@ define rsyslog::add_conf (
     'relp' => ':omrelp:'
   }
 
-  file { "/etc/rsyslog.d/puppet_managed/${name}.conf":
+  file { "/etc/rsyslog.simp.d/10_simp_remote/${name}.conf":
+    ensure  => present,
     owner   => 'root',
     group   => 'root',
     mode    => '0640',
-    content => empty($dest) ? {
-      true  => $content,
-      false => inline_template('
-<% t_dest = @dest.dup -%>
+    content => inline_template('<% t_dest = @dest.dup -%>
 <% if not (t_dest.length.eql?(1) and scope.function_host_is_me(t_dest)) -%>
 $RepeatedMsgReduction off
-<%= @content %>     <%= @prefix[@dest_type] %><%= t_dest.shift %>
+<%= @rule.split("\n").collect{ |x| x.sub(/^\s+/,"") }.join("\n") + "\n" %>    <%= @prefix[@dest_type] %><%= t_dest.shift %>
 $ActionExecOnlyWhenPreviousIsSuspended on
 <%   t_dest.each do |dest| -%>
 <%     if not scope.function_host_is_me([dest]) -%>
@@ -74,11 +75,7 @@ $ActionExecOnlyWhenPreviousIsSuspended on
 $ActionExecOnlyWhenPreviousIsSuspended off
 $RepeatedMsgReduction on
 <% end -%>
-')
-    },
+'),
     notify => Service['rsyslog']
   }
-
-  validate_array($dest)
-  validate_array_member($dest_type,['tcp','udp','relp'])
 }

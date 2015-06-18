@@ -3,18 +3,18 @@ $template puppetmasterErrTemplate,"/var/log/puppet-master-err.log"
 $template slapdAuditTemplate,"/var/log/slapd_audit.log"
 
 if $syslogfacility-text == 'kern' and $msg startswith 'IPT:' then /var/log/iptables.log
-& ~
+& stop
 
 if $programname == 'puppet-agent' and $syslogseverity-text == 'err' then /var/log/puppet-agent-err.log
 if $programname == 'puppet-agent' then /var/log/puppet-agent.log
-& ~
+& stop
 
 if $programname == 'puppet-master' and $syslogseverity-text == 'err' then ?puppetmasterErrTemplate
 if $programname == 'puppet-master' then ?puppetmasterTemplate
-& ~
+& stop
 
 if $programname == 'slapd_audit' then ?slapdAuditTemplate
-& ~
+& stop
 
 *.info;mail.none;authpriv.none;cron.none;local6.none;local5.none /var/log/messages
 authpriv.*;local6.*                           /var/log/secure

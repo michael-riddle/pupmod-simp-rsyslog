@@ -1,0 +1,72 @@
+class rsyslog::params {
+  $preserveFQDN                                 = 'on'
+  $system_log_rate_limit_interval               = '0'
+  $system_log_rate_limit_burst                  = '1000'
+  $mainMsgQueueType                             = 'LinkedList'
+  $mainMsgQueueFilename                         = 'main_msg_queue'
+  $mainMsgQueueMaxFileSize                      = '5'
+  $mainMsgQueueSize                             = ''
+  $mainMsgQueueHighWatermark                    = ''
+  $mainMsgQueueLowWatermark                     = ''
+  $mainMsgQueueDiscardmark                      = ''
+  $mainMsgQueueWorkerThreadMinimumMessages      = ''
+  $mainMsgQueueWorkerThreads                    = ''
+  $mainMsgQueueWorkerTimeoutThreadShutdown      = '5000'
+  $mainMsgQueueTimeoutEnqueue                   = '100'
+  $mainMsgQueueDequeueSlowdown                  = '0'
+  $mainMsgQueueSaveOnShutdown                   = 'on'
+  $mainMsgQueueMaxDiskSpace                     = ''
+  $actionResumeInterval                         = '30'
+  $actionResumeRetryCount                       = '-1'
+  $tcpAllowedSender                             = [ '127.0.0.1', hiera('client_nets') ]
+  $controlCharacterEscapePrefix                 = '#'
+  $defaultTemplate                              = 'original'
+  $dirCreateMode                                = '0750'
+  $dirGroup                                     = 'root'
+  $dirOwner                                     = 'root'
+  $dropMsgsWithMaliciousDnsPTRRecords           = 'off'
+  $escapeControlCharactersOnReceive             = 'on'
+  $fileCreateMode                               = '0640'
+  $fileGroup                                    = 'root'
+  $fileOwner                                    = 'root'
+  $include_config                               = '/etc/rsyslog.d/*.conf'
+  $repeatedMsgReduction                         = 'on'
+  $workDirectory                                = '/var/spool/rsyslog'
+  $interval                                     = '0'
+  $tcpserver                                    = hiera('rsyslog::params::tcpserver',false)
+  $tcpServerRun                                 = hiera('rsyslog::params::tcpServerRun','514')
+  $use_tls                                      = true
+  $tls_tcpserver                                = hiera('rsyslog::params::tls_tcpserver',false)
+  $tls_tcpServerRun                             = hiera('rsyslog::params::tls_tcpServerRun','6514')
+  $tls_tcpMaxSessions                           = '200'
+  $tls_inputTCPServerStreamDriverPermittedPeers = ["*.${::domain}"]
+  $use_simp_pki                                 = true
+  $cert_source                                  = ''
+  $defaultNetStreamDriverCAFile                 = '/etc/rsyslog.d/pki/cacerts/cacerts.pem'
+  $defaultNetStreamDriverCertFile               = "/etc/rsyslog.d/pki/public/${::fqdn}.pub"
+  $defaultNetStreamDriverKeyFile                = "/etc/rsyslog.d/pki/private/${::fqdn}.pem"
+  $actionSendStreamDriverPermittedPeers         = hiera('log_servers',[])
+  $actionSendStreamDriverAuthMode               = 'x509/name'
+  $udpserver                                    = hiera('rsyslog::params::udpserver',false)
+  $udpServerAddress                             = '127.0.0.1'
+  $udpServerRun                                 = hiera('rsyslog::params::udpServerRun','514')
+  $udpAllowedSender                             = [ '127.0.0.1', hiera('client_nets') ]
+  $umask                                        = '0027'
+  $ulimit_max_open_files                        = 'unlimited'
+  $compat_mode                                  = '5'
+  $hostlist                                     = ''
+  $domainlist                                   = ''
+  $suppress_noauth_warn                         = false
+  $disable_remote_dns                           = false
+  $enable_default_rules                         = true
+  $include_rsyslog_d                            = false
+  $allow_failover                               = false
+  $is_server                                    = false
+  $client_nets                                  = hiera('client_nets')
+
+  $log_server_list = hiera_array('log_servers')
+  if !empty($secondary_log_servers) and (size($secondary_log_servers) > 1){
+    $secondary_log_servers = delete_at($secondary_log_servers, 0)
+  }
+   
+}
